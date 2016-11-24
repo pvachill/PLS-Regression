@@ -1,7 +1,7 @@
 /* This class contains the variables and the methods for a complete PLS Regression */
 
-#ifndef PLS_H
-#include PLS_H
+#ifndef PLS_HPP
+#define PLS_HPP
 
 #include <iostream>
 #include <armadillo>
@@ -14,13 +14,13 @@ class PLSR
 {
  public:
 
-  PLSR(mat X, mat Y);
+  PLSR( const mat & X, const mat & Y);
 
   void PLSRegression();
 
-  mat Predictors() const { return X; }
+  const mat &  Predictors() const { return X; }
 
-  mat Observations() const { return Y; }
+  const mat &  Observations() const { return Y; }  
 
   mat LatentVec() const { return T; }
 
@@ -35,10 +35,10 @@ class PLSR
 
  private:
   //! The predictors matrix.
-  mat X;
+  const mat & X;
 
   //! The observations matrix.
-  mat Y;
+  const mat & Y;
 
   //! The latent vectors or score matrix of X.
   mat T;
@@ -54,4 +54,17 @@ class PLSR
 
   //! The weight matrix or the loadings of Y.
   mat C;
+
+  //! The number of patterns (data)
+  
+  int patterns;
+
+  //! The numver of X-variables
+  int varsX;
+
+  //! The number of Y-variables
+  int varsY; 
 }; // End of class definition
+
+#include "pls_impl.hpp"
+#endif
