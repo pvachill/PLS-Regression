@@ -18,6 +18,8 @@ class PLSR
 
   void PLSRegression();
 
+  mat VarExp(  int n );
+
   const mat &  Predictors() const { return X; }
 
   const mat &  Observations() const { return Y; }  
@@ -26,9 +28,9 @@ class PLSR
 
   mat LoadingsX() const { return P; }
 
-  mat LoadingsY() const { return C; }
+  mat LoadingsY() const { return Q; }
 
-  mat ScoreY() const { return U; }
+  mat ScoresY() const { return U; }
 
   mat RegressionWeights() const { return B; }
 
@@ -53,7 +55,7 @@ class PLSR
   mat B;
 
   //! The weight matrix or the loadings of Y.
-  mat C;
+  mat Q;
 
   //! The number of patterns (data)
   
