@@ -13,15 +13,18 @@ int main( int argc, char *argv[] ) {
     X.load(x_filename, csv_ascii);	
     mat P;
     P.load(y_filename, csv_ascii);
+
+	
+	X = normalise(X.each_row() - mean(X,0));
+	P = normalise(P.each_row() - mean(P,0));
 	mat Y = P.col(0);
 
-	//X = X.each_col()- mean(X,1);
-	//P = P.each_row() -mean(P,0);
-	PLSR model(X,Y);
+	PLSR model(X,P);
 
 	const mat & D = model.Observations();
 
-	model.PLSRegression();
+	//model.PLS1();
+	model.PLS1();
 
 	mat T = model.LatentVec();
 
@@ -29,8 +32,9 @@ int main( int argc, char *argv[] ) {
 	//double lvar,var;
 	//var = var(Y.col(0));
 	//lvar = var(T.)
-	for( int i = 1; i<15	; i++)
-	 model.VarExp(i);//.print();
+	for( int i = 0; i<15	; i++)
+	 model.VarExp(i	).print();
+	// model.VarExp(	).print();
 
 	
 
