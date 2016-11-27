@@ -21,22 +21,31 @@ int main( int argc, char *argv[] ) {
 
 	PLSR model(X,P);
 
-	const mat & D = model.Observations();
 
 	//model.PLS1();
-	model.PLS1();
+	wall_clock timer;
+	timer.tic();
+	model.PLSRegression( X,P,14);
 
-	mat T = model.LatentVec();
+	//mat T = model.LatentVec();
 
 
 	//double lvar,var;
 	//var = var(Y.col(0));
 	//lvar = var(T.)
-	for( int i = 0; i<15	; i++)
-	 model.VarExp(i	).print();
-	// model.VarExp(	).print();
+	for( int i = 0; i<5; i++)
+	 model.VarExp( X,P,i).print();
+		double n = timer.toc();
+	cout << "Seconds per regression: " << n <<endl;
 
-	
+
+	// model.VarExp(	).print();
+	/*cube A = model.LOOCV(X,P,14);
+	cout<<endl;
+	for(int i =0; i<4;i++){
+		A.slice(i).print();
+		cout <<endl;
+	}*/
 
 	return 0;
 }

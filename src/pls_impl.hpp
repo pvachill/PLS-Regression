@@ -4,9 +4,7 @@
 #include "pls.hpp"
 
 // 	Constructor implemenation 
-PLSR::PLSR(const mat & X, const mat & Y):
-	X(X),
-	Y(Y)
+PLSR::PLSR(const mat & X, const mat & Y)
 {
 	if( (patterns = X.n_rows ) != Y.n_rows ) {
 		cout << "The number of Predictors (X) does not match the number of Observations (Y)" << endl;
@@ -17,7 +15,7 @@ PLSR::PLSR(const mat & X, const mat & Y):
 	varsY = Y.n_cols;
 } // End of constructor.
 
-void PLSR::PLSRegression() {
+void PLSR::PLSRegression(const mat& X, const mat& Y, const int comp ) {
 
 
     T = zeros<mat>(patterns, varsX);
@@ -35,7 +33,7 @@ void PLSR::PLSRegression() {
 	vec last_t(patterns, fill::zeros);
 	vec w(patterns, fill::zeros);
 	
-	for( int j = 0; j < varsX; j++ ) { 
+	for( int j = 0; j < comp; j++ ) { 
 		// Here we find the PLS components and loadings
 		srand(time(NULL));
 		u=F.col(rand()%varsY);	
@@ -69,7 +67,7 @@ void PLSR::PLSRegression() {
 	return;
 }
 
-void PLSR::PLS1()
+void PLSR::PLS1( const mat& X, const mat& Y, const int comp )
 {
 
 	vec t(patterns, fill::zeros);
@@ -88,7 +86,7 @@ void PLSR::PLS1()
 	w = normalise(X.t()*Y);
 	t = X*w;
 
-	for( int i = 0; i < varsX; i++ ) {
+	for( int i = 0; i < comp; i++ ) {
 		double tk = conv_to<double>::from(t.t()*t);
 		t /= tk;
 		p = E.t()*t;
@@ -111,11 +109,13 @@ void PLSR::PLS1()
 	} // End of for loop	
 } // End of PLS1
 
-mat PLSR::VarExp(  int comp)
+// Percentage of variance explained
+mat PLSR::VarExp( const mat& X, const mat& Y, int comp)
 {
 	return 1 - (SSE(X, Y, comp) / TSS(Y, comp));
 }
 
+// Sum of squared errors
 rowvec PLSR::SSE( const mat& X, const mat& Y, const int comp)
 {
 	mat res = Residuals(X, Y, comp);
@@ -127,6 +127,7 @@ rowvec PLSR::SSE( const mat& X, const mat& Y, const int comp)
 	return e;
 }
 
+// Total sum of squares
 rowvec PLSR::TSS( const mat& Y, const int comp )
 {
 	rowvec tss(varsY, fill::zeros);
@@ -138,27 +139,83 @@ rowvec PLSR::TSS( const mat& Y, const int comp )
 
 }
 
+// Residual space (error)
 mat PLSR::Residuals( const mat& X, const mat& Y, const int comp )
 {	
 	return Y - FittedValues(X, comp);
 }
 
+// Predicted Values
 mat PLSR::FittedValues( const mat& X, const int comp )
 {	
 	return X*Coefficients(comp);
 	//return U*Q.t();
 	}
 
-
+// Compute coefficients (BPLS) 	
 mat PLSR::Coefficients( const int comp )
 {
-	//mat a = P.t();
-	//mat in = pinv(a);
-	//return in.cols(0,comp)*B.rows(0,comp).cols(0,comp)*Q.cols(0,comp).t();
-	mat tem = P.t()*W;
-	tem = pinv(tem);
-	B = W.cols(0,comp)*tem.rows(0,comp).cols(0,comp)*Q.cols(0,comp).t();
-	return B;
+	mat a = P.t();
+	mat in = pinv(a);
+	return in.cols(0,comp)*B.rows(0,comp).cols(0,comp)*Q.cols(0,comp).t();
+	//mat tem = P.t()*W;
+	//tem = pinv(tem);
+	//B = W.cols(0,comp)*tem.rows(0,comp).cols(0,comp)*Q.cols(0,comp).t();
+	//return B;
 }
 
+cube PLSR::LOOCV_Residuals( const mat& X, const mat& Y, const int comp )
+{;
+	cube res(patterns, varsY, comp);
+	mat Xtr = X.rows(1, patterns -1);
+	mat Ytr = Y.rows(1, patterns -1);
+	PLSR cvModel(Xtr, Ytr);
+
+	for( register int i = 0; i < patterns; i++) {
+		cvModel.PLSRegression(Xtr, Ytr, comp);
+		for( register int j = 0; j< comp; j++){
+			rowvec tempRes = cvModel.Residuals( X.row(i), Y.row(i), j);
+			res.slice(j).row(i) = tempRes;
+		} // End of Residuals for
+
+		if( i < Xtr.n_rows){
+			Xtr(i) = X(i);
+			Ytr(i) = Y(i);
+		}
+
+	} // End of cross validation for
+	return res;
+} // End of leave one out cross validation function
+
+const cube  PLSR::LOOCV( const mat& X, const mat& Y, const int comp )
+{
+	cube res = LOOCV_Residuals(X, Y, comp);
+	cube statistics(comp, varsY, 4, fill::zeros);
+	mat SSE(comp, varsY,fill::zeros);
+	mat RMSE(comp, varsY, fill::zeros);
+	mat MSE(comp ,varsY, fill::zeros);
+	mat R2(comp, varsY, fill::zeros);
+
+	for( int i = 0; i < comp; i++)
+		for( int j = 0; j < varsY; j++){
+			vec temp = res.slice(i).col(j);
+			SSE(i,j) = dot(temp, temp);
+			vec temp1 = Y.col(j)-temp;
+			R2(i,j) = 1 - SSE(i,j)/dot(temp1,temp1);
+		}
+	
+	MSE = SSE/patterns;
+	RMSE = sqrt(MSE);
+
+	statistics.slice(0) = SSE;
+	statistics.slice(1) = MSE;
+	statistics.slice(2) = RMSE;
+	statistics.slice(3) = R2;
+	
+	return statistics;
+	}
+
+
+
 #endif
+

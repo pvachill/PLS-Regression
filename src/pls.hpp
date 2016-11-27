@@ -14,13 +14,17 @@ class PLSR
 {
  public:
 
+  PLSR( const int patterns, const int varsX, const int varsY ){;};
+
   PLSR( const mat& X, const mat& Y);
 
-  void PLSRegression();
+  void PLSRegression( const mat& X, const mat& Y, const int comp );
 
-  void PLS1();
+  void PLS1( const mat& X, const mat& Y, const int comp );
 
-  mat VarExp( int comp );
+  cube LOOCV_Residuals( const mat& X, const mat& Y, const int comp );
+
+  mat VarExp( const mat& X, const mat& Y, int comp );
 
   rowvec TSS( const mat& Y, const int comp );
 
@@ -32,9 +36,7 @@ class PLSR
 
   mat Coefficients( const int comp);
 
-  const mat &  Predictors() const { return X; };
-
-  const mat &  Observations() const { return Y; }  
+  const cube LOOCV( const mat& X, const mat& Y, const int comp );
 
   mat LatentVec() const { return T; }
 
@@ -48,12 +50,6 @@ class PLSR
 
 
  private:
-  //! The predictors matrix.
-  const mat& X;
-
-  //! The observations matrix.
-  const mat& Y;
-
   //! The latent vectors or score matrix of X.
   mat T;
 
@@ -69,14 +65,13 @@ class PLSR
   //! The weight matrix or the loadings of Y.
   mat Q;
 
-  // something from pls1
+  //! something from pls1
   mat W;
 
-  // eror factor?
+  //! eror factor?
   mat B0;
 
   //! The number of patterns (data)
-  
   int patterns;
 
   //! The numver of X-variables
