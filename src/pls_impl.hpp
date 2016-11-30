@@ -4,7 +4,11 @@
 #include "pls.hpp"
 
 // 	Constructor implemenation 
-PLSR::PLSR(const mat & X, const mat & Y)
+PLSR::PLSR(const mat & X, const mat & Y, const int comp ):
+	X(X),
+	Y(Y),
+	components(comp)
+
 {
 	if( (patterns = X.n_rows ) != Y.n_rows ) {
 		cout << "The number of Predictors (X) does not match the number of Observations (Y)" << endl;
@@ -15,8 +19,24 @@ PLSR::PLSR(const mat & X, const mat & Y)
 	varsY = Y.n_cols;
 } // End of constructor.
 
-void PLSR::PLSRegression(const mat& X, const mat& Y, const int comp ) {
+PLSR::PLSR( const int comp ):
+	components(comp)
+{ varsX = varsY = patterns = 0; }	
 
+void PLSR::PLSRegression(const mat& X, const mat& Y,  int comp ) {
+
+	patterns = X.n_rows;
+	varsX = X.n_cols;
+	varsY = Y.n_cols;
+
+	if( patterns != Y.n_rows ) {
+		cout << "The number of Predictors (X) does not match the number of Observations (Y)" << endl;
+		exit(0);
+	}
+
+
+	if( comp = -1 ) comp = components;
+	ComponentCheck(varsX, comp);
 
     T = zeros<mat>(patterns, varsX);
 	P = zeros<mat>(varsX, varsX);
@@ -67,8 +87,20 @@ void PLSR::PLSRegression(const mat& X, const mat& Y, const int comp ) {
 	return;
 }
 
-void PLSR::PLS1( const mat& X, const mat& Y, const int comp )
+void PLSR::PLS1( const mat& X, const mat& Y, int comp )
 {
+	patterns = X.n_rows;
+	varsX = X.n_cols;
+	varsY = Y.n_cols;
+
+	if( patterns != Y.n_rows ) {
+		cout << "The number of Predictors (X) does not match the number of Observations (Y)" << endl;
+		exit(0);
+	}
+
+
+	if( comp = -1 ) comp = components;
+	ComponentCheck(varsX, comp);
 
 	vec t(patterns, fill::zeros);
 	vec q(varsY, fill::zeros);
@@ -112,7 +144,7 @@ void PLSR::PLS1( const mat& X, const mat& Y, const int comp )
 // Percentage of variance explained
 mat PLSR::VarExp( const mat& X, const mat& Y, int comp)
 {
-	return 1 - (SSE(X, Y, comp) / TSS(Y, comp));
+	return 1 - (SSE(X, Y, comp) / TSS(Y));
 }
 
 // Sum of squared errors
@@ -128,7 +160,7 @@ rowvec PLSR::SSE( const mat& X, const mat& Y, const int comp)
 }
 
 // Total sum of squares
-rowvec PLSR::TSS( const mat& Y, const int comp )
+rowvec PLSR::TSS( const mat& Y )
 {
 	rowvec tss(varsY, fill::zeros);
 
@@ -140,21 +172,27 @@ rowvec PLSR::TSS( const mat& Y, const int comp )
 }
 
 // Residual space (error)
-mat PLSR::Residuals( const mat& X, const mat& Y, const int comp )
+mat PLSR::Residuals( const mat& X, const mat& Y, int comp )
 {	
+	if( comp = -1 ) comp = components;
+	ComponentCheck(varsX, comp);
 	return Y - FittedValues(X, comp);
 }
 
 // Predicted Values
-mat PLSR::FittedValues( const mat& X, const int comp )
+mat PLSR::FittedValues( const mat& X, int comp )
 {	
+	if( comp = -1 ) comp = components;
+	ComponentCheck(varsX, comp);
 	return X*Coefficients(comp);
 	//return U*Q.t();
 	}
 
 // Compute coefficients (BPLS) 	
-mat PLSR::Coefficients( const int comp )
-{
+mat PLSR::Coefficients( int comp )
+{	
+	if( comp = -1 ) comp = components;
+	ComponentCheck(varsX, comp);
 	mat a = P.t();
 	mat in = pinv(a);
 	return in.cols(0,comp)*B.rows(0,comp).cols(0,comp)*Q.cols(0,comp).t();
@@ -165,11 +203,15 @@ mat PLSR::Coefficients( const int comp )
 }
 
 cube PLSR::LOOCV_Residuals( const mat& X, const mat& Y, const int comp )
-{;
+{	
+	
+
+
 	cube res(patterns, varsY, comp);
 	mat Xtr = X.rows(1, patterns -1);
 	mat Ytr = Y.rows(1, patterns -1);
-	PLSR cvModel(Xtr, Ytr);
+
+	PLSR cvModel(Xtr, Ytr, comp);
 
 	for( register int i = 0; i < patterns; i++) {
 		cvModel.PLSRegression(Xtr, Ytr, comp);
@@ -187,8 +229,11 @@ cube PLSR::LOOCV_Residuals( const mat& X, const mat& Y, const int comp )
 	return res;
 } // End of leave one out cross validation function
 
-const cube  PLSR::LOOCV( const mat& X, const mat& Y, const int comp )
+const cube  PLSR::LOOCV( const mat& X, const mat& Y, int comp )
 {
+	if( comp = -1 ) comp = components;
+	ComponentCheck(varsX, comp);
+
 	cube res = LOOCV_Residuals(X, Y, comp);
 	cube statistics(comp, varsY, 4, fill::zeros);
 	mat SSE(comp, varsY,fill::zeros);
@@ -214,6 +259,14 @@ const cube  PLSR::LOOCV( const mat& X, const mat& Y, const int comp )
 	
 	return statistics;
 	}
+
+void PLSR::ComponentCheck( const int vars, const int comp)
+{
+	if( comp >= varsX || comp <= 0){
+		 cout << "Wrong number of components. Check again your values" << endl;
+	    exit(0);
+	}	
+}
 
 
 

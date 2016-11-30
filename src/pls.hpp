@@ -14,42 +14,58 @@ class PLSR
 {
  public:
 
-  PLSR( const int patterns, const int varsX, const int varsY ){;};
+  PLSR(const int comp = 10);
 
-  PLSR( const mat& X, const mat& Y);
+  PLSR( const mat& X, const mat& Y, const int comp = 10 );
 
-  void PLSRegression( const mat& X, const mat& Y, const int comp );
+  void PLSRegression( const mat& X, const mat& Y, int comp = -1 );
+  void PLSRegression( const int comp = -1) { PLSRegression(X, Y, comp); };
 
-  void PLS1( const mat& X, const mat& Y, const int comp );
+  void PLS1( const mat& X, const mat& Y, int comp = -1 );
+  void PLS1( const int comp = -1) { PLS1(X, Y, comp); };
 
-  cube LOOCV_Residuals( const mat& X, const mat& Y, const int comp );
+  cube LOOCV_Residuals( const mat& X, const mat& Y, int comp = -1 );
+  cube LOOCV_Residuals( const int comp = -1 ) { return LOOCV_Residuals(X, Y, comp); };
 
-  mat VarExp( const mat& X, const mat& Y, int comp );
+  mat VarExp( const mat& X, const mat& Y, const int comp = -1 );
+  mat VarExp( const int comp = -1 ) { return VarExp(X, Y, comp); };
 
-  rowvec TSS( const mat& Y, const int comp );
+  rowvec TSS( const mat& Y);
 
-  rowvec SSE( const mat& X, const mat& Y, const int comp);
+  rowvec SSE( const mat& X, const mat& Y, const int comp = -1);
+  rowvec SSE( const int comp = -1 ) { return SSE(X, Y, comp); };
 
-  mat Residuals( const mat& x, const mat& Y, const int comp);
+  mat Residuals( const mat& x, const mat& Y, int comp = -1);
+  mat Residuals( const int comp = -1 ) { return Residuals(X, Y, comp); };
 
-  mat FittedValues( const mat& X, const int comp);
+  mat FittedValues( const mat& X, int comp = -1);
+  mat FittedValues( const int comp = -1 ) { return FittedValues(X, comp); };
 
-  mat Coefficients( const int comp);
+  mat Coefficients( const int comp = -1);
 
-  const cube LOOCV( const mat& X, const mat& Y, const int comp );
+  const cube LOOCV( const mat& X, const mat& Y, int comp = -1 );
+  const cube LOOCV( const int comp = -1 ) { return LOOCV(X, Y, comp); };
 
-  mat LatentVec() const { return T; }
+  void ComponentCheck( const int vars, const int comp);
 
-  mat LoadingsX() const { return P; }
 
-  mat LoadingsY() const { return Q; }
+  mat LatentVec( const int comp = -1 ) const { return T; }
 
-  mat ScoresY() const { return U; }
+  mat LoadingsX( const int comp = -1 ) const { return P; }
 
-  mat RegressionWeights() const { return B; }
+  mat LoadingsY( const int comp = -1 ) const { return Q; }
+
+  mat ScoresY( const int comp = -1  ) const { return U; }
+
+  mat RegressionWeights( const int comp = -1  ) const { return B; }
 
 
  private:
+
+
+  const mat& X = NULL;
+  const mat& Y = NULL;
+  int components;
   //! The latent vectors or score matrix of X.
   mat T;
 
