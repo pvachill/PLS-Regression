@@ -15,16 +15,21 @@ PLSR::PLSR(const mat & X, const mat & Y, const int comp ):
 		exit(0);
 	}
 
+
 	varsX = X.n_cols;
 	varsY = Y.n_cols;
 } // End of constructor.
 
 PLSR::PLSR( const int comp ):
+	X(Null),
+	Y(Null),
 	components(comp)
-{ varsX = varsY = patterns = 0; }	
+{ 	varsX = varsY = patterns = 0; 
+	Null = mat(0,0);
+}	
 
-void PLSR::PLSRegression(const mat& X, const mat& Y,  int comp ) {
-
+/*void PLSR::PLSRegression(const mat& X, const mat& Y,  int comp ) {
+	
 	patterns = X.n_rows;
 	varsX = X.n_cols;
 	varsY = Y.n_cols;
@@ -33,9 +38,9 @@ void PLSR::PLSRegression(const mat& X, const mat& Y,  int comp ) {
 		cout << "The number of Predictors (X) does not match the number of Observations (Y)" << endl;
 		exit(0);
 	}
+	
 
-
-	if( comp = -1 ) comp = components;
+	if( comp == -1 ) comp = components;
 	ComponentCheck(varsX, comp);
 
     T = zeros<mat>(patterns, varsX);
@@ -85,7 +90,7 @@ void PLSR::PLSRegression(const mat& X, const mat& Y,  int comp ) {
 		if( all(vectorise(E) < 0.00001) ) break;
 	} // End of for loop	
 	return;
-}
+}*/
 
 void PLSR::PLS1( const mat& X, const mat& Y, int comp )
 {
@@ -99,7 +104,7 @@ void PLSR::PLS1( const mat& X, const mat& Y, int comp )
 	}
 
 
-	if( comp = -1 ) comp = components;
+	if( comp == -1 ) comp = components;
 	ComponentCheck(varsX, comp);
 
 	vec t(patterns, fill::zeros);
@@ -151,7 +156,7 @@ mat PLSR::VarExp( const mat& X, const mat& Y, int comp)
 rowvec PLSR::SSE( const mat& X, const mat& Y, const int comp)
 {
 	mat res = Residuals(X, Y, comp);
-	rowvec e(varsY, fill::zeros);
+	rowvec e(Y.n_cols, fill::zeros);
 
 	for( int i = 0; i< varsY; i++ )
 		e.col(i) = res.col(i).t()*res.col(i);
@@ -174,7 +179,7 @@ rowvec PLSR::TSS( const mat& Y )
 // Residual space (error)
 mat PLSR::Residuals( const mat& X, const mat& Y, int comp )
 {	
-	if( comp = -1 ) comp = components;
+	if( comp == -1 ) comp = components;
 	ComponentCheck(varsX, comp);
 	return Y - FittedValues(X, comp);
 }
@@ -182,25 +187,26 @@ mat PLSR::Residuals( const mat& X, const mat& Y, int comp )
 // Predicted Values
 mat PLSR::FittedValues( const mat& X, int comp )
 {	
-	if( comp = -1 ) comp = components;
+	if( comp == -1 ) comp = components;
 	ComponentCheck(varsX, comp);
 	return X*Coefficients(comp);
 	//return U*Q.t();
 	}
 
-// Compute coefficients (BPLS) 	
+/*// Compute coefficients (BPLS) 	
 mat PLSR::Coefficients( int comp )
 {	
-	if( comp = -1 ) comp = components;
+	if( comp == -1 ) comp = components;
 	ComponentCheck(varsX, comp);
 	mat a = P.t();
 	mat in = pinv(a);
-	return in.cols(0,comp)*B.rows(0,comp).cols(0,comp)*Q.cols(0,comp).t();
+	//a.print();
+	return in.cols(0,comp-1)*B.rows(0,comp-1).cols(0,comp-1)*Q.cols(0,comp-1).t();
 	//mat tem = P.t()*W;
 	//tem = pinv(tem);
 	//B = W.cols(0,comp)*tem.rows(0,comp).cols(0,comp)*Q.cols(0,comp).t();
 	//return B;
-}
+}*/
 
 cube PLSR::LOOCV_Residuals( const mat& X, const mat& Y, const int comp )
 {	
@@ -211,12 +217,12 @@ cube PLSR::LOOCV_Residuals( const mat& X, const mat& Y, const int comp )
 	mat Xtr = X.rows(1, patterns -1);
 	mat Ytr = Y.rows(1, patterns -1);
 
-	PLSR cvModel(Xtr, Ytr, comp);
+	//PLSR cvModel(Xtr, Ytr, comp);
 
 	for( register int i = 0; i < patterns; i++) {
-		cvModel.PLSRegression(Xtr, Ytr, comp);
+		PLSRegression(Xtr, Ytr, comp);
 		for( register int j = 0; j< comp; j++){
-			rowvec tempRes = cvModel.Residuals( X.row(i), Y.row(i), j);
+			rowvec tempRes = Residuals( X.row(i), Y.row(i), j+1);
 			res.slice(j).row(i) = tempRes;
 		} // End of Residuals for
 
@@ -231,7 +237,7 @@ cube PLSR::LOOCV_Residuals( const mat& X, const mat& Y, const int comp )
 
 const cube  PLSR::LOOCV( const mat& X, const mat& Y, int comp )
 {
-	if( comp = -1 ) comp = components;
+	if( comp == -1 ) comp = components;
 	ComponentCheck(varsX, comp);
 
 	cube res = LOOCV_Residuals(X, Y, comp);
@@ -262,8 +268,8 @@ const cube  PLSR::LOOCV( const mat& X, const mat& Y, int comp )
 
 void PLSR::ComponentCheck( const int vars, const int comp)
 {
-	if( comp >= varsX || comp <= 0){
-		 cout << "Wrong number of components. Check again your values" << endl;
+	if( comp > varsX || comp <= 0){
+		 cout << "Wrong number of components. Check again your values PLS" << endl;
 	    exit(0);
 	}	
 }

@@ -1,5 +1,4 @@
 /* This class contains the variables and the methods for a complete PLS Regression */
-
 #ifndef PLS_HPP
 #define PLS_HPP
 
@@ -18,7 +17,7 @@ class PLSR
 
   PLSR( const mat& X, const mat& Y, const int comp = 10 );
 
-  void PLSRegression( const mat& X, const mat& Y, int comp = -1 );
+  virtual void PLSRegression( const mat& X, const mat& Y, int comp = -1 ) =0;
   void PLSRegression( const int comp = -1) { PLSRegression(X, Y, comp); };
 
   void PLS1( const mat& X, const mat& Y, int comp = -1 );
@@ -41,7 +40,7 @@ class PLSR
   mat FittedValues( const mat& X, int comp = -1);
   mat FittedValues( const int comp = -1 ) { return FittedValues(X, comp); };
 
-  mat Coefficients( const int comp = -1);
+  virtual mat Coefficients( const int comp = -1) =0;
 
   const cube LOOCV( const mat& X, const mat& Y, int comp = -1 );
   const cube LOOCV( const int comp = -1 ) { return LOOCV(X, Y, comp); };
@@ -60,11 +59,13 @@ class PLSR
   mat RegressionWeights( const int comp = -1  ) const { return B; }
 
 
- private:
+ protected:
 
+  mat Null;
 
-  const mat& X = NULL;
-  const mat& Y = NULL;
+  const mat& X;
+
+  const mat& Y;
   int components;
   //! The latent vectors or score matrix of X.
   mat T;
@@ -98,4 +99,6 @@ class PLSR
 }; // End of class definition
 
 #include "pls_impl.hpp"
+#include "pls1.hpp"
+#include "mvpls.hpp"
 #endif
