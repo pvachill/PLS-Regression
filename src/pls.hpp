@@ -115,7 +115,6 @@ class PLSR
   */
   rowvec TSS( const mat& Y );
 
-  
   /**
   * The Sum of Squared Error or (Residual Sum of Squares) calculates the
   * difference of the dependtend data (Y) and the predictions Y':
