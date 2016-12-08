@@ -1,5 +1,5 @@
 /**
- * @file pls.hpp
+ * @file pls_impl.hpp
  * @author Pasias Axilleas
  *
  * Implementation of Partial Least Squares (PLS)

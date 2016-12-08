@@ -1,5 +1,5 @@
 /**
- * @file pls1.hpp
+ * @file mvpls_impl.hpp
  * @author Pasias Axilleas
  *
  * Implementation of Multivariate Partial Least Squares1 (MVPLS) 

@@ -241,13 +241,6 @@ class PLSR
   	ComponentCheck(varsX, comp);
   	return U.cols(0,comp); }
 
-  //! Get the first comp Regression Weights (B)
-  mat RegressionWeights( int comp = -1  ) { 
-    if( comp == -1) comp = components;
-  	ComponentCheck(varsX, comp);
-  	return B.cols(0,comp).rows(0,comp); }
-
-
  protected:
 
   //! Used to initialize Observations and Predictions.
@@ -274,10 +267,8 @@ class PLSR
   //! The weight matrix or the loadings of Y.
   mat Q;
 
-  //! something from pls1
+  //! Weights
   mat W;
-
-  mat B;
 
   //! The number of patterns (data)
   int patterns;

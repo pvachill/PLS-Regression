@@ -1,5 +1,5 @@
 /**
- * @file pls1.hpp
+ * @file mvpls.hpp
  * @author Pasias Axilleas
  *
  * Implementation of Multivariate Partial Least Squares1 (MVPLS) 
@@ -34,6 +34,16 @@ class MVPLS: public PLSR{
   * according to this formula: \f$ BPLS = P^{-1}*B*Q^T\f$.
   */
   mat Coefficients( const int comp = -1);
+
+  //! Get the first comp Regression Weights (B)
+  mat RegressionWeights( int comp = -1  ) { 
+    if( comp == -1) comp = components;
+  	ComponentCheck(varsX, comp);
+  	return B.cols(0,comp).rows(0,comp); }
+
+ private:
+  //! Regression Weights
+  mat B;
 };
 
 #include "mvpls_impl.hpp"
