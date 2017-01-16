@@ -2,7 +2,7 @@
  * @file mvpls.hpp
  * @author Pasias Axilleas
  *
- * Implementation of Multivariate Partial Least Squares1 (MVPLS) 
+ * Implementation of Multivariate Partial Least Squares (MVPLS) 
  * Thie implementation is taken from the book 
  * "Encyclopedia for research methods for the social sciences" of Hervé Abdi .
  */
@@ -23,9 +23,9 @@ using namespace arma;
 */
 class MVPLS: public PLSR{
  public:
-  MVPLS( const mat& X, const mat& Y, const int comp = 10 ): PLSR(X, Y, comp) {}
+  MVPLS( const mat& X, const mat& Y, const int comp = 10, const double tolerance = 0.00001 ): PLSR(X, Y, comp, tolerance) {}
 
-  MVPLS( const int comp = 10 ): PLSR(comp) {}
+  MVPLS( const int comp = 10, const double tolerance = 0.00001 ): PLSR(comp, tolerance) {}
   
   void PLSRegression( const mat& X, const mat& Y, int comp = -1 );
   

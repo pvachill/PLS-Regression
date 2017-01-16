@@ -23,6 +23,7 @@ class 	EPO
  	mat DifferenceSpectra( const mat& X, const mat& Y);
 
  	mat Coefficients(const int comp = -1);
+ 	
  	mat Projection( const int comp = -1);
 
  	void ComponentCheck( const int vars, const int comp);

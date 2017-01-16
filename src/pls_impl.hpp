@@ -147,6 +147,7 @@ const cube  PLSR::LOOCV( const mat& X, const mat& Y, int comp )
 	
 	MSE = SSE/patterns;
 	RMSE = sqrt(MSE);
+	cout<<patterns;
 
 	// Statistics
 	statistics.slice(0) = SSE;

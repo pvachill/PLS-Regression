@@ -85,7 +85,7 @@ mat PLS1::Coefficients( int comp )
 	ComponentCheck(varsX, comp);
 	
 	mat tem = P.t()*W; 
-	tem= pinv(tem); // pseudo inverse of temp
+	tem= pinv(tem); // Moore-Penrose Pseudo inverse of temp
 	return W.cols(0,comp-1)*tem.rows(0,comp-1).cols(0,comp-1)*Q.cols(0,comp-1).t(); // Coefficients
 } // End of Coefficients
 

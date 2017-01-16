@@ -1,8 +1,8 @@
 /**
- * @file pls.hpp
+ * @file pls1.hpp
  * @author Pasias Axilleas
  *
- * Implementation of Partial Least Squares (PLS)
+ * Implementation of Partial Least Squares1 (PLS1)
  *
  */
 #ifndef PLS1_HPP
@@ -23,15 +23,15 @@ using namespace arma;
 class PLS1: public PLSR{
  public:
   
-  PLS1( const mat& X, const mat& Y, const int comp = 10 ): PLSR(X, Y, comp) {}
+  PLS1( const mat& X, const mat& Y, const int comp = 10, const double tolerance = 0.00001 ): PLSR(X, Y, comp, tolerance) {}
   
-  PLS1( const int comp = 10 ): PLSR(comp) {}
+  PLS1( const int comp = 10, const double tolerance = 0.00001 ): PLSR(comp, tolerance) {}
   
   void PLSRegression( const mat& X, const mat& Y, int comp = -1 );
   
   /**
   * In PLS1 method the Coefficients are computed according to this
-  * formula: \f$ B = W(P^TW)^{-1}q\f$ 
+  * formula: \f$ BPLS = W(P^TW)^{-1}q\f$ 
   */
   mat Coefficients( const int comp = -1);
 };

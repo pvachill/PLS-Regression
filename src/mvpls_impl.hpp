@@ -2,9 +2,9 @@
  * @file mvpls_impl.hpp
  * @author Pasias Axilleas
  *
- * Implementation of Multivariate Partial Least Squares1 (MVPLS) 
+ * Implementation of Multivariate Partial Least Squares (MVPLS) 
  * Thie implementation is taken from the book 
- * "Encyclopedia for research methods for the social sciences" of Hervé Abdi .
+ * "Encyclopedia for research methods for the social sciences" of Hervé Abdi.
  */
 #ifndef MVPLS_IMPL_HPP
 #define MVPLS_IMPL_HPP
@@ -83,14 +83,14 @@ void MVPLS::PLSRegression(const mat& X, const mat& Y,  int comp ) {
 	return;
 } // End of PLSRegression
 
-// Return the coefficinets
+// Return the coefficients
 mat MVPLS::Coefficients( int comp )
 {	// Check the numbe of components	
 	if( comp == -1 ) comp = components;
 	ComponentCheck(varsX, comp);
 
 	mat a = P.t(); // Transpose Loadings of X
-	mat Pin = pinv(a); // Pseudo inverse of a
+	mat Pin = pinv(a); // Moore-Penrose Pseudo inverse of a
 	return Pin.cols(0,comp-1)*B.rows(0,comp-1).cols(0,comp-1)*Q.cols(0,comp-1).t(); // Coefficients
 } // End of Coefficients
 

@@ -15,8 +15,7 @@ int main( int argc, char *argv[] ) {
     P.load(y_filename, csv_ascii);
 
 	
-	X = normalise(X.each_row() - mean(X,0));
-	P = normalise(P.each_row() - mean(P,0));
+	
 	mat Y = P.col(0);
 
 	PLSR model(X,P);
