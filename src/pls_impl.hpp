@@ -14,7 +14,6 @@
 PLSR::PLSR(const mat & X, const mat & Y, const int comp, const double tolerance ):
 	X(X),
 	Y(Y),
-	components(comp),
 	tolerance(tolerance)
 
 {
@@ -23,9 +22,13 @@ PLSR::PLSR(const mat & X, const mat & Y, const int comp, const double tolerance 
 		exit(0);
 	}
 
-
 	varsX = X.n_cols;
 	varsY = Y.n_cols;
+	if( comp == -1 ) components = min(patterns,varsX);
+	else components = comp;
+//	ComponentCheck(comp);
+
+
 } // End of Constructor1 implemenation.
 
 // Constructor2 implemenation
@@ -75,7 +78,7 @@ mat PLSR::Residuals( const mat& X, const mat& Y, int comp )
 {	
 	// Check the number of components
 	if( comp == -1 ) comp = components;
-	ComponentCheck(varsX, comp);
+	//ComponentCheck(min(patterns,varsX), comp);
 	// Return the errors (Residual Space)
 	return Y - FittedValues(X, comp);
 } // End of Residuals
@@ -85,7 +88,7 @@ mat PLSR::FittedValues( const mat& X, int comp )
 {	
 	// Check the number of components
 	if( comp == -1 ) comp = components;
-	ComponentCheck(varsX, comp);
+	//ComponentCheck(min(patterns,varsX), comp);
 	// Return the Fitted Values
 	return X*Coefficients(comp);
 	} // End of FittedValues
@@ -126,7 +129,7 @@ const cube  PLSR::LOOCV( const mat& X, const mat& Y, int comp )
 {
 	// Check the number of components
 	if( comp == -1 ) comp = components; 
-	ComponentCheck(varsX, comp);
+	//ComponentCheck(min(patterns,varsX), comp);
 
 	cube res = LOOCV_Residuals(X, Y, comp); // Acquire the Residuals
 	cube statistics(comp, varsY, 4, fill::zeros); // Statistics
@@ -147,8 +150,7 @@ const cube  PLSR::LOOCV( const mat& X, const mat& Y, int comp )
 	
 	MSE = SSE/patterns;
 	RMSE = sqrt(MSE);
-	cout<<patterns;
-
+	
 	// Statistics
 	statistics.slice(0) = SSE;
 	statistics.slice(1) = MSE;
@@ -157,15 +159,15 @@ const cube  PLSR::LOOCV( const mat& X, const mat& Y, int comp )
 	
 	return statistics;
 } // End of LOOCV
-
+/*
 // Check the number of Components
-void PLSR::ComponentCheck( const int vars, const int comp)
+void PLSR::ComponentCheck( const int maxComp, const int comp)
 {	
 	// If the number of components are not valid, print a message and exit
-	if( comp > varsX || comp <= 0){
-		 cout << "Wrong number of components. Check again your values PLS" << endl;
+	if( comp > maxComp || comp <= 0 || comp> components){
+		 cout << "Wrong number of components. Check again your values PLS. Maximum components: "<< components << endl;
 	    exit(0);
 	}	
-} // End of ComponentCheck
+} // End of ComponentCheck*/
 
 #endif

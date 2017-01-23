@@ -29,7 +29,7 @@ void PLS1::PLSRegression(const mat& X, const mat& Y,  int comp )
 
 	// Check the number of components
 	if( comp == -1 ) comp = components;
-	ComponentCheck(varsX, comp);
+	//ComponentCheck(comp);
 
 	// Score and Loading vectors used in algorithm
 	vec t(patterns, fill::zeros);
@@ -38,11 +38,11 @@ void PLS1::PLSRegression(const mat& X, const mat& Y,  int comp )
 	vec w(varsX, fill::zeros);
 
 	// Initialize Loadings and Scores
-	U = zeros<mat>(patterns, varsX);
-	T = zeros<mat>(patterns, varsX);
-	P = zeros<mat>(varsX, varsX);
-	Q = zeros<mat>(varsY, varsX);
-	W = zeros<mat>(varsX, varsX);
+	U = zeros<mat>(patterns, comp);
+	T = zeros<mat>(patterns, comp);
+	P = zeros<mat>(varsX, comp);
+	Q = zeros<mat>(varsY, comp);
+	W = zeros<mat>(varsX, comp);
 
 	
 	mat E = X; // We dont want to change X permanently
@@ -82,7 +82,7 @@ void PLS1::PLSRegression(const mat& X, const mat& Y,  int comp )
 mat PLS1::Coefficients( int comp )
 {	// Check the number of components
 	if( comp == -1 ) comp = components;
-	ComponentCheck(varsX, comp);
+	//ComponentCheck(varsX, comp);
 	
 	mat tem = P.t()*W; 
 	tem= pinv(tem); // Moore-Penrose Pseudo inverse of temp

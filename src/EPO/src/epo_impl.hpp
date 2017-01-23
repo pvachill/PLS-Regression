@@ -10,7 +10,7 @@ EPO::EPO( const mat& X, const mat& Y, const int comp ):
 {
 	if( (patterns = X.n_rows ) != Y.n_rows ) {
 		cout << "The number of Predictors (X) does not match the number of Observations (Y)" << endl;
-		exit(0);
+	//	exit(0);
 	}
 
 	varsX = X.n_cols;
@@ -21,7 +21,7 @@ mat EPO::ProjectionEPO( const mat& X, const mat& Y, int comp )
 
 	varsX = X.n_cols;
 	if( comp = -1 ) comp = components;
-	ComponentCheck(varsX, comp);
+//	ComponentCheck(varsX, comp);
 
 	mat D = X-Y;
 	coeff = princomp(D.t()*D);
@@ -52,8 +52,8 @@ mat EPO::Projection( const int comp )
 
 mat EPO::Coefficients(const int comp )
 {
-	ComponentCheck(varsX, comp);
-	return coeff.cols(0,comp);
+//	ComponentCheck(varsX, comp);
+	return coeff.cols(0,comp-1);
 }
 
 void EPO::ComponentCheck( const int vars, const int comp)

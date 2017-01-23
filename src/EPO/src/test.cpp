@@ -1,70 +1,117 @@
 #include "epo.hpp"
 #include <iostream>
+#include <iomanip>
 #include "../../pls.hpp"
 
+#define EVALUATION 1
 using namespace arma;
 using namespace std;
 
+
+
 int main( int argc, char *argv[] ) {
 
-    wall_clock a;
-	mat s30, s40, s50, s60, s70, cont;
-	s30.load("dataset/spec30.csv", csv_ascii);	
-	s40.load("dataset/spec40.csv", csv_ascii);	
-    s50.load("dataset/spec50.csv", csv_ascii);	
-    s60.load("dataset/spec60.csv", csv_ascii);	
-    s70.load("dataset/spec70.csv", csv_ascii);
-    cont.load("dataset/conc.csv", csv_ascii);
+    mat X1,X2,X3,X4,REF,Y;
+    X4.load("dataset/smoothDataset/4kPa_tr");
+    X3.load("dataset/smoothDataset/10kPa_tr");
+    X2.load("dataset/smoothDataset/100kPa_tr");
+    X1.load("dataset/smoothDataset/300kPa_tr");
+    REF.load("dataset/smoothDataset/600kPa_tr");
+    Y.load("dataset/smoothDataset/OM_tr");
 
-    mat X;
-    mat Y;
+    mat st = X4;
+    
+    Y = normalise(Y.each_row() - mean(Y,0));
+    st = normalise(st.each_row() - mean(st,0));
+
+    mat X1ev,X2ev,X3ev,X4ev,REFev,Yev;
+    X4ev.load("dataset/smoothDataset/4kPa_ev");
+    X3ev.load("dataset/smoothDataset/10kPa_ev");
+    X2ev.load("dataset/smoothDataset/100kPa_ev");
+    X1ev.load("dataset/smoothDataset/300kPa_ev");
+    REFev.load("dataset/smoothDataset/600kPa_ev");
+    Yev.load("dataset/smoothDataset/OM_ev");
+
+    mat ev = X4ev;
+    
+    Yev = normalise(Yev.each_row() - mean(Yev,0));
+    ev = normalise(ev.each_row() - mean(ev,0));
+    
+    int end = st.n_rows -1;
+    int endev = ev.n_rows-1;
+    double tolerance = 0.01;
+    int comp = 15;
+    int width = 25;
+    mat varexp(comp,1); 
+
+    PLS1 model(st.rows(0,end), Y.col(0).rows(0,end), comp, tolerance);
+    
+    model.PLSRegression(st.rows(0,end), Y.col(0).rows(0,end), comp);
+    
+    cout << "PLS Without EPO\n"<<endl;
+    cout <<left<<setw(width)<< "Variance EXP"<<setw(width)<<"SSE"<<setw(width)<<"MSE"<<setw(width)<<"RMSE"<<setw(width)<<"RSquared"<<endl;
   
-    s30 = normalise(s30.each_row() - mean(s30,0));
-    s40 = normalise(s40.each_row() - mean(s40,0));
-    s50 = normalise(s50.each_row() - mean(s50,0));
-    s60 = normalise(s60.each_row() - mean(s60,0));
-    s70 = normalise(s70.each_row() - mean(s70,0));
+    for(int i =0; i<comp; i++)
+        varexp.row(i) = model.VarExp(st.rows(0,end), Y.rows(0,end).col(0), i+1);   
 
-    cont = normalise(cont.each_row() - mean(cont,0));
-mat st = s70;
-    a.tic();
-int end = s30.n_rows -1;
-	
-	PLS1 model(st.rows(0,end), cont.col(0).rows(0,end), 11, 0.00001);
-	
-    model.PLSRegression(st.rows(0,end), cont.col(0).rows(0,end), 11);
-	
-	for(int i =0; i<10; i++){
-		model.VarExp(st.rows(0,end), cont.rows(0,end).col(0), i+1).print();
-		cout<<endl;	
-	}
+    cube stat = model.LOOCV(st.rows(0,end), Y.rows(0,end).col(0), comp);
+    
+    for( int i = 0; i<comp; i++)
+        cout << setw(width)<< varexp(i) << setw(width) << stat(i,0,0) << setw(width) << stat(i,0,1)<< setw(width) << stat(i,0,2) << setw(width) <<stat(i,0,3)<< endl;
 
+    model.PLSRegression(st.rows(0,end), Y.col(0).rows(0,end), comp);
+    if(EVALUATION){
+        for(int i =0; i<comp; i++)
+            varexp.row(i) = model.VarExp(ev, Yev.rows(0,endev).col(0), i+1);
 
-	cube stat = model.LOOCV(st.rows(0,end), cont.rows(0,end).col(0), 15);
-    stat.print();	
-    double n = a.toc();
-    cout <<endl<<"Seconds: "<<n<<endl;
+        cout <<"\n\nEVALUATION\n";
 
+        for( int i = 0; i<comp; i++)
+         cout <<setw(width)<< varexp(i);
+    } 
+ 
+ /* IN THIS SECTION WE MAKE USE OF EXTERNAL PARAMETER ORTHOGONALIZATION METHOD */
 
+    mat X=X4+X2+X1+X3;
+    X/=4;
 
-    X = s40 +s60;
-    X = X/2;
+    int compEPO=25;
+    
+    for(int j  =9;j<compEPO;j++){
+        EPO epo(X, REF,j+1);
+        epo.ProjectionEPO(X,REF,j+1);
+        st= epo.TransformedSpectra(X4, j+1);
 
+        st = normalise(st.each_row() - mean(st,0));
+   
+   
+        model.PLSRegression(st.rows(0,end), Y.col(0).rows(0,end), comp);
+    
+        cout << endl<<"PLS With EPO\n"<<endl;
+        cout <<left<<setw(width)<< "Variance EXP"<<setw(width)<<"SSE"<<setw(width)<<"MSE"<<setw(width)<<"RMSE"<<setw(width)<<"RSquared"<<endl;
+    
+        for(int i =0; i<comp; i++)
+            varexp.row(i) = model.VarExp(st.rows(0,end), Y.rows(0,end).col(0), i+1);   
 
-    EPO epo(X, s30,20);
-    epo.ProjectionEPO(X,s30,20);
-   st= epo.TransformedSpectra(st, 11);
-  	PLS1 model1(st.rows(0,end), cont.col(0).rows(0,end), 11, 0.00001);
+        stat = model.LOOCV(st.rows(0,end), Y.rows(0,end).col(0), comp);
+        
+        for( int i = 0; i<comp; i++)
+            cout <<setw(width)<< varexp(i) << setw(width) << stat(i,0,0) << setw(width) << stat(i,0,1)<< setw(width) << stat(i,0,2) << setw(width) <<stat(i,0,3)<< endl;
+        
+            model.PLSRegression(st.rows(0,end), Y.col(0).rows(0,end), comp);
 
-	
-    model1.PLSRegression(st.rows(0,end), cont.col(0).rows(0,end), 11);
-	
-	for(int i =0; i<10; i++){
-		model1.VarExp(st.rows(0,end), cont.rows(0,end).col(0), i+1).print();
-		cout<<endl;	
-	}
- stat = model.LOOCV(st.rows(0,end), cont.rows(0,end).col(0), 15);
-    stat.print();
+        if(EVALUATION){
+            ev= epo.TransformedSpectra(X4ev, j+1);
+            ev = normalise(ev.each_row() - mean(ev,0));
+            for(int i =0; i<comp; i++){
+                varexp.row(i) = model.VarExp(ev.rows(0,endev), Yev.rows(0,endev).col(0), i+1);
+            }
+            cout<<"\n\nEVALUATION\n";
+            for( int i = 0; i<comp; i++){
+                cout <<endl<<setw(width)<< varexp(i);//    cout << setw(width)<< varexp(i) << setw(width) << stat(i,0,0) << setw(width) << stat(i,0,1)<< setw(width) << stat(i,0,2) << setw(width) <<stat(i,0,3)<< endl;
+            }
+        }
+    }
 	return 0;
 
 }

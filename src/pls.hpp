@@ -208,7 +208,7 @@ class PLSR
   const cube LOOCV( const int comp = -1 ) { return LOOCV(X, Y, comp); };
 
   //! Checks if the number of Components given is valid.
-  void ComponentCheck( const int vars, const int comp );
+ // void ComponentCheck( const int macComp, const int comp );
 
   //! Get the tolerance for termination
   double Tolerance() const { return tolerance; };
@@ -219,25 +219,25 @@ class PLSR
   //! Get the first comp Scores (T) of Observations (X).
   mat LatentVec(  int comp = -1 ) { 
   	if( comp == -1) comp = components;
-  	ComponentCheck(varsX, comp);
+  //	ComponentCheck(min(patterns,varsX), comp);
   	return T.cols(0,comp); }
 
   //! Get the the first comp Loadings (P) of Observations (X).  
   mat LoadingsX( int comp = -1 ) { 
   	if( comp == -1) comp = components;
-  	ComponentCheck(varsX, comp);
-  	return P.rows(0,comp); }
+  //	ComponentCheck(min(patterns,varsX), comp);
+  	return P.cols(0,comp); }
 
   // Get the first comp Loadings (Q) of Predictions (Y).
   mat LoadingsY( int comp = -1 ) { 
   	if( comp == -1) comp = components;
-  	ComponentCheck(varsX, comp);
-  	return Q.rows(0,comp); }
+  //	ComponentCheck(min(patterns,varsY), comp);
+  	return Q.cols(0,comp); }
 
   //! Get the Score Matrix (U) of Predictions (Y).
   mat ScoresY(  int comp = -1  ) { 
   	if( comp == -1) comp = components;
-  	ComponentCheck(varsX, comp);
+  //	ComponentCheck(min(patterns,varsY), comp);
   	return U.cols(0,comp); }
 
  protected:

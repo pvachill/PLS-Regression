@@ -38,7 +38,7 @@ class MVPLS: public PLSR{
   //! Get the first comp Regression Weights (B)
   mat RegressionWeights( int comp = -1  ) { 
     if( comp == -1) comp = components;
-  	ComponentCheck(varsX, comp);
+  	//ComponentCheck(varsX, comp);
   	return B.cols(0,comp).rows(0,comp); }
 
  private:

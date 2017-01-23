@@ -25,7 +25,7 @@ void MVPLS::PLSRegression(const mat& X, const mat& Y,  int comp ) {
 
 	// Check the number of components
 	if( comp == -1 ) comp = components;
-	ComponentCheck(varsX, comp);
+	//ComponentCheck(varsX, comp);
 
 	// Score and Loading vectors used in algorithm
 	vec t(patterns, fill::zeros);
@@ -87,7 +87,7 @@ void MVPLS::PLSRegression(const mat& X, const mat& Y,  int comp ) {
 mat MVPLS::Coefficients( int comp )
 {	// Check the numbe of components	
 	if( comp == -1 ) comp = components;
-	ComponentCheck(varsX, comp);
+	//ComponentCheck(varsX, comp);
 
 	mat a = P.t(); // Transpose Loadings of X
 	mat Pin = pinv(a); // Moore-Penrose Pseudo inverse of a
